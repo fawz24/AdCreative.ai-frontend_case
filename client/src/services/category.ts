@@ -18,9 +18,11 @@ type SearchCategoryReturnData = {
 export const searchCategories = async ({
   selectedCategoryIds,
   query,
+  requestInit,
 }: {
   query: string;
   selectedCategoryIds: string[];
+  requestInit?: RequestInit;
 }) => {
   try {
     const res = await fetch("/api/category", {
@@ -29,6 +31,7 @@ export const searchCategories = async ({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ query, selectedCategories: selectedCategoryIds }),
+      ...requestInit,
     });
     const data = await res.json();
     return data.data as SearchCategoryReturnData;

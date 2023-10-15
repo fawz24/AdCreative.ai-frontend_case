@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { getAllCategories, searchCategories } from "./services/category";
 import { SearchIcon } from "./components/SearchIcon";
@@ -11,6 +11,7 @@ function App() {
   const [selectedCategories, setSelectedCategories] = useLocalStorage<
     CategoryEntry[]
   >("selectedCategories", []);
+  const controllerRef = useRef<AbortController>();
 
   const selectedCategoryIds = selectedCategories.map(({ id }) => id);
   const unselectedCategories = categories.filter(
@@ -34,10 +35,18 @@ function App() {
   };
 
   const search: React.FormEventHandler<HTMLFormElement> = async (e) => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+    const signal = controllerRef.current.signal;
     e.preventDefault();
     const result = await searchCategories({
       selectedCategoryIds,
       query: searchQuery,
+      requestInit: {
+        signal,
+      },
     });
     setCategories(result.matchingCategories);
   };
