@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import { getAllCategories } from "./services/category";
 import { SearchIcon } from "./components/SearchIcon";
+import { CategoryEntry } from "./type";
 
 function App() {
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoryEntry[]>([]);
 
   const fetchAllCategories = async () => {
     const data = await getAllCategories();
@@ -29,10 +30,10 @@ function App() {
         </label>
         <div className="max-h-80 overflow-y-auto">
           <ul>
-            {categories.map((category) => (
-              <li key={category} value={category}>
+            {categories.map(({ category, id }) => (
+              <li key={id} value={category}>
                 <label>
-                  <input type="checkbox" name="category" value={category} />
+                  <input type="checkbox" name="category" value={id} />
                   {category}
                 </label>
               </li>
