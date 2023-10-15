@@ -4,6 +4,8 @@ import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
 
+import apiRouter from "./routes/api";
+
 const port = process.env.PORT || 3001;
 const frontendDir = process.env.FRONTEND_DIR
   ? [process.env.FRONTEND_DIR]
@@ -15,6 +17,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.resolve(...frontendDir)));
+
+app.use("/api", apiRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
