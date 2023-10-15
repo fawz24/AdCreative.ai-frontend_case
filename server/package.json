@@ -1,0 +1,28 @@
+{
+  "name": "server",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npx tsc",
+    "start": "cross-env FRONTEND_DIR=$(pwd)/../client/build node ./build/index.js",
+    "dev": "cross-env FRONTEND_DIR=$(pwd)/../client/build concurrently \"npx tsc --watch\" \"nodemon -q build/index.js\""
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "cross-env": "^7.0.3",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.4",
+    "@types/express": "^4.17.19",
+    "@types/morgan": "^1.9.6",
+    "@types/node": "^20.8.6",
+    "concurrently": "^8.2.1",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}
