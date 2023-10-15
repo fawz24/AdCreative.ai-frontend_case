@@ -1,0 +1,10 @@
+{
+  "name": "frontend-case",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build:client": "cd client && npm install && npm run build"
+  },
+  "author": "",
+  "license": "ISC"
+}
