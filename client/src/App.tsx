@@ -5,8 +5,13 @@ import { SearchIcon } from "./components/SearchIcon";
 import { CategoryEntry } from "./type";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { CategoryListItem } from "./components/CategoryListItem";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+type FetchStatus = "initial" | "idle" | "fetching" | "error";
 
 function App() {
+  const [fetchStatus, setFetchStatus] = useState<FetchStatus>("initial");
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState<CategoryEntry[]>([]);
   const [selectedCategories, setSelectedCategories] = useLocalStorage<
@@ -42,46 +47,81 @@ function App() {
     controllerRef.current = new AbortController();
     const signal = controllerRef.current.signal;
     e.preventDefault();
-    const result = await searchCategories({
+    setFetchStatus("fetching");
+    const { data, error } = await searchCategories({
       selectedCategoryIds,
       query: searchQuery,
       requestInit: {
         signal,
       },
     });
-    setCategories(result.matchingCategories);
+    if (error) {
+      setFetchStatus("error");
+      return;
+    }
+    setCategories(data.matchingCategories);
+    setFetchStatus("idle");
   };
 
   const fetchAllCategories = async () => {
-    const data = await getAllCategories();
+    setFetchStatus("fetching");
+    const { data, error } = await getAllCategories();
+    if (error) {
+      setFetchStatus("error");
+      return;
+    }
     setCategories(data);
+    setFetchStatus("idle");
   };
 
   useEffect(() => {
     fetchAllCategories();
   }, []);
 
+  useEffect(() => {
+    if (fetchStatus === "error") {
+      toast.dismiss();
+      toast.error("Kategori bilgileri çekerken beklenmeyen bir hata oluştu", {
+        position: "bottom-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
+  }, [fetchStatus]);
+
+  const noMoreItems =
+    (fetchStatus === "idle" || fetchStatus === "error") &&
+    unselectedCategories.length <= 0;
+
   return (
-    <main className="p-10">
+    <main className="p-10 h-[100vh] relative">
       <form
-        className="border border-gray-2 rounded-md bg-gray-1 p-6 w-max flex flex-col items-start mx-auto gap-3"
+        className="border py-6 border-gray-2 rounded-md bg-gray-1 w-[30rem] flex flex-col items-start mx-auto my-auto gap-3 text-xl"
         onSubmit={search}
       >
-        <h2>Kategoriler</h2>
-        <label className="w-full flex justify-between items-center p-2 rounded-md text-gray-3 bg-white border border-gray-2 focus-within:outline-2 focus-within:outline-gray-2 focus-within:outline">
-          <input
-            type="text"
-            placeholder="kategori ara..."
-            className="w-full border-none outline-none"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-            }}
-          />
-          <SearchIcon className="pointer-events-none" />
-        </label>
-        <div className="max-h-80 overflow-y-auto">
+        <h2 className="px-6">Kategoriler</h2>
+        <div className="px-6 w-full">
+          <label className="w-full flex justify-between items-center p-2 rounded-md text-gray-3 bg-white border border-gray-2 focus-within:outline-2 focus-within:outline-gray-2 focus-within:outline">
+            <input
+              type="text"
+              placeholder="kategori ara..."
+              className="w-full border-none outline-none"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+              }}
+            />
+            <SearchIcon className="pointer-events-none" />
+          </label>
+        </div>
+        <div className="w-full pr-6">
           <ul
+            className="max-h-80 overflow-auto flex flex-col gap-1 pl-6 w-full"
             onKeyDown={(event) => {
               if (event.code === "Enter") {
                 event.preventDefault();
@@ -108,10 +148,14 @@ function App() {
             ))}
           </ul>
         </div>
-        <button className="bg-blue-1 text-white w-full p-2 rounded-md">
-          Ara
-        </button>
+        {noMoreItems && <div className="px-6">Daha fazla sonuç yok</div>}
+        <div className="px-6 w-full">
+          <button className="bg-[#264cc5] text-white w-full p-2 rounded-md">
+            Ara
+          </button>
+        </div>
       </form>
+      <ToastContainer />
     </main>
   );
 }
