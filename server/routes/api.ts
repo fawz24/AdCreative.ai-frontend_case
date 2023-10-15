@@ -1,11 +1,12 @@
 import express from "express";
+import { decodeHTML } from "entities";
 import data from "../items.json";
 
 var router = express.Router();
 
 const categories = data.data.map((entry, index) => ({
   id: `${index}`,
-  category: entry,
+  category: decodeHTML(entry),
 }));
 
 router.get("/category", function (req, res, next) {
@@ -19,7 +20,7 @@ router.post("/category", function (req, res, next) {
     selectedCategories: string[];
     query: string;
   };
-  const pattern = RegExp(`${query}`, "ig");
+  const pattern = RegExp(`${query.trim().replace(".", "\\.")}`, "ig");
   const matchingCategories = categories.filter(
     (category) =>
       pattern.test(category.category) &&
