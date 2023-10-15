@@ -22,7 +22,7 @@ router.post("/category", function (req, res, next) {
   };
   const decodededQuery = decodeHTML(query);
   console.log({ decodededQuery });
-  const pattern = RegExp(`${decodededQuery.trim().replace(".", "\\.")}`, "ig");
+  const pattern = RegExp(`${decodededQuery.trim().replace(".", "\\.")}`, "i");
   const matchingCategories = categories.filter(
     (category) =>
       pattern.test(category.category) &&
