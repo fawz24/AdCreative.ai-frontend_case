@@ -4,6 +4,7 @@ import { getAllCategories, searchCategories } from "./services/category";
 import { SearchIcon } from "./components/SearchIcon";
 import { CategoryEntry } from "./type";
 import { useLocalStorage } from "./hooks/useLocalStorage";
+import { CategoryListItem } from "./components/CategoryListItem";
 
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,7 +26,7 @@ function App() {
     });
   };
 
-  const unselectCategory = (category: CategoryEntry) => {
+  const deselectCategory = (category: CategoryEntry) => {
     setSelectedCategories((_selectedCategories) => {
       const newSelectedCategories = _selectedCategories.filter(
         ({ id }) => id !== category.id
@@ -88,61 +89,23 @@ function App() {
               }
             }}
           >
-            {selectedCategories.map((categoryEntry) => {
-              const { id, category } = categoryEntry;
-              return (
-                <li key={id} value={category}>
-                  <label className="flex gap-4">
-                    <input
-                      type="checkbox"
-                      name="category"
-                      value={id}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          selectCategory(categoryEntry);
-                        } else {
-                          unselectCategory(categoryEntry);
-                        }
-                      }}
-                      className="peer"
-                      checked={true}
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                    />
-                    <span className="peer-checked:text-blue-2">{category}</span>
-                  </label>
-                </li>
-              );
-            })}
-            {unselectedCategories.map((categoryEntry) => {
-              const { id, category } = categoryEntry;
-              return (
-                <li key={id} value={category}>
-                  <label className="flex gap-4">
-                    <input
-                      type="checkbox"
-                      name="category"
-                      value={id}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          selectCategory(categoryEntry);
-                        } else {
-                          unselectCategory(categoryEntry);
-                        }
-                      }}
-                      className="peer"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                      }}
-                    />
-                    <span className="peer-checked:text-blue-2">{category}</span>
-                  </label>
-                </li>
-              );
-            })}
+            {selectedCategories.map((category) => (
+              <CategoryListItem
+                key={category.id}
+                category={category}
+                selectCategory={selectCategory}
+                deselectCategory={deselectCategory}
+                isSelected={true}
+              />
+            ))}
+            {unselectedCategories.map((category) => (
+              <CategoryListItem
+                key={category.id}
+                category={category}
+                selectCategory={selectCategory}
+                deselectCategory={deselectCategory}
+              />
+            ))}
           </ul>
         </div>
         <button className="bg-blue-1 text-white w-full p-2 rounded-md">
