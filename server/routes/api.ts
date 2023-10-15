@@ -20,7 +20,9 @@ router.post("/category", function (req, res, next) {
     selectedCategories: string[];
     query: string;
   };
-  const pattern = RegExp(`${query.trim().replace(".", "\\.")}`, "ig");
+  const decodededQuery = decodeHTML(query);
+  console.log({ decodededQuery });
+  const pattern = RegExp(`${decodededQuery.trim().replace(".", "\\.")}`, "ig");
   const matchingCategories = categories.filter(
     (category) =>
       pattern.test(category.category) &&
