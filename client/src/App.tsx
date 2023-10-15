@@ -1,11 +1,44 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import { getAllCategories } from "./services/category";
+import { getAllCategories, searchCategories } from "./services/category";
 import { SearchIcon } from "./components/SearchIcon";
 import { CategoryEntry } from "./type";
 
 function App() {
+  const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState<CategoryEntry[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<CategoryEntry[]>(
+    []
+  );
+
+  const selectedCategoryIds = selectedCategories.map(({ id }) => id);
+  const unselectedCategories = categories.filter(
+    ({ id }) => !selectedCategoryIds.includes(id)
+  );
+
+  const selectCategory = (category: CategoryEntry) => {
+    setSelectedCategories((_selectedCategories) => {
+      const newSelectedCategories = [category].concat(_selectedCategories);
+      return newSelectedCategories;
+    });
+  };
+
+  const unselectCategory = (category: CategoryEntry) => {
+    setSelectedCategories((_selectedCategories) => {
+      const newSelectedCategories = _selectedCategories.filter(
+        ({ id }) => id !== category.id
+      );
+      return newSelectedCategories;
+    });
+  };
+
+  const search = async () => {
+    const result = await searchCategories({
+      selectedCategoryIds,
+      query: searchQuery,
+    });
+    setCategories(result.matchingCategories);
+  };
 
   const fetchAllCategories = async () => {
     const data = await getAllCategories();
@@ -25,22 +58,45 @@ function App() {
             type="text"
             placeholder="kategori ara..."
             className="w-full border-none outline-none"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+            }}
           />
           <SearchIcon className="pointer-events-none" />
         </label>
         <div className="max-h-80 overflow-y-auto">
           <ul>
-            {categories.map(({ category, id }) => (
-              <li key={id} value={category}>
-                <label>
-                  <input type="checkbox" name="category" value={id} />
-                  {category}
-                </label>
-              </li>
-            ))}
+            {selectedCategories
+              .concat(unselectedCategories)
+              .map((categoryEntry) => {
+                const { id, category } = categoryEntry;
+                return (
+                  <li key={id} value={category}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="category"
+                        value={id}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            selectCategory(categoryEntry);
+                          } else {
+                            unselectCategory(categoryEntry);
+                          }
+                        }}
+                      />
+                      {category}
+                    </label>
+                  </li>
+                );
+              })}
           </ul>
         </div>
-        <button className="bg-blue text-white w-full p-2 rounded-md">
+        <button
+          className="bg-blue text-white w-full p-2 rounded-md"
+          onClick={search}
+        >
           Ara
         </button>
       </div>
