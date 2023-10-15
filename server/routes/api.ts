@@ -14,4 +14,23 @@ router.get("/category", function (req, res, next) {
   });
 });
 
+router.post("/category", function (req, res, next) {
+  const { selectedCategories, query = "" } = req.body as {
+    selectedCategories: string[];
+    query: string;
+  };
+  const pattern = RegExp(`${query}`, "ig");
+  const matchingCategories = categories.filter(
+    (category) =>
+      pattern.test(category.category) &&
+      !selectedCategories.includes(category.id)
+  );
+  res.json({
+    data: {
+      selectedCategories,
+      matchingCategories,
+    },
+  });
+});
+
 export default router;
