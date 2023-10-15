@@ -11,6 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 type FetchStatus = "initial" | "idle" | "fetching" | "error";
 
 function App() {
+  const [errorMessage, setErrorMessage] = useState("");
   const [fetchStatus, setFetchStatus] = useState<FetchStatus>("initial");
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState<CategoryEntry[]>([]);
@@ -18,6 +19,7 @@ function App() {
     CategoryEntry[]
   >("selectedCategories", []);
   const controllerRef = useRef<AbortController>();
+  const lastSearchRef = useRef("");
 
   const selectedCategoryIds = selectedCategories.map(({ id }) => id);
   const unselectedCategories = categories.filter(
@@ -41,12 +43,18 @@ function App() {
   };
 
   const search: React.FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+    // prevent new query when the query search has not changed
+    if (lastSearchRef.current === searchQuery) {
+      return;
+    }
+    lastSearchRef.current = searchQuery;
+    // abort ongoing search
     if (controllerRef.current) {
       controllerRef.current.abort();
     }
     controllerRef.current = new AbortController();
     const signal = controllerRef.current.signal;
-    e.preventDefault();
     setFetchStatus("fetching");
     const { data, error } = await searchCategories({
       selectedCategoryIds,
@@ -57,6 +65,7 @@ function App() {
     });
     if (error) {
       setFetchStatus("error");
+      setErrorMessage(error);
       return;
     }
     setCategories(data.matchingCategories);
@@ -68,6 +77,7 @@ function App() {
     const { data, error } = await getAllCategories();
     if (error) {
       setFetchStatus("error");
+      setErrorMessage(error);
       return;
     }
     setCategories(data);
@@ -79,7 +89,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (fetchStatus === "error") {
+    if (fetchStatus === "error" && !/user aborted/gi.test(errorMessage)) {
       toast.dismiss();
       toast.error("Kategori bilgileri çekerken beklenmeyen bir hata oluştu", {
         position: "bottom-center",
@@ -92,7 +102,7 @@ function App() {
         theme: "light",
       });
     }
-  }, [fetchStatus]);
+  }, [fetchStatus, errorMessage]);
 
   const noMoreItems =
     (fetchStatus === "idle" || fetchStatus === "error") &&
