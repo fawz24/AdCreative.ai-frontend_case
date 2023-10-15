@@ -19,7 +19,6 @@ function App() {
     CategoryEntry[]
   >("selectedCategories", []);
   const controllerRef = useRef<AbortController>();
-  const lastSearchRef = useRef("");
 
   const selectedCategoryIds = selectedCategories.map(({ id }) => id);
   const unselectedCategories = categories.filter(
@@ -44,11 +43,6 @@ function App() {
 
   const search: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    // prevent new query when the query search has not changed
-    if (lastSearchRef.current === searchQuery) {
-      return;
-    }
-    lastSearchRef.current = searchQuery;
     // abort ongoing search
     if (controllerRef.current) {
       controllerRef.current.abort();
