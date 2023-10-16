@@ -21,8 +21,12 @@ router.post("/category", function (req, res, next) {
     query: string;
   };
   const decodededQuery = decodeHTML(query);
-  console.log({ decodededQuery });
-  const pattern = RegExp(`${decodededQuery.trim().replace(".", "\\.")}`, "i");
+  const replacedQuery = decodededQuery
+    .replace(/(?<!\\)\\$/, (match) => "\\\\")
+    .replace(/[.+*?^$)([\]{}\|]/g, (match) => {
+      return `\\${match}`;
+    });
+  const pattern = RegExp(`${replacedQuery.trim()}`, "i");
   const matchingCategories = categories.filter(
     (category) =>
       pattern.test(category.category) &&
