@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build:client": "cd client && npm install && npm run build",
-    "build:server": "cd api && npm install && npm run build",
-    "build": "run-s build:*"
+    "setup:client": "cd client && npm install",
+    "setup:server": "cd server && npm install",
+    "setup": "run-s setup:*",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "build": "run-s build:*",
+    "start": "cd server && npm start"
   },
   "author": "",
   "license": "ISC",
