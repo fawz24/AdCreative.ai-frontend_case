@@ -1,0 +1,19 @@
+.loading {
+  --loading-duration: 1.5s;
+  --loading-stagger: 1.1s;
+  --loading-interval: calc(var(--loading-duration) - var(--loading-stagger));
+  animation: load var(--loading-duration) ease-in
+    calc(var(--loading-interval) * var(--loading-index)) infinite both;
+}
+
+@keyframes load {
+  0% {
+    @apply scale-0 -translate-x-2;
+  }
+  50% {
+    @apply scale-100;
+  }
+  100% {
+    @apply scale-0 translate-x-2;
+  }
+}
